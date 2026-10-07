@@ -7,6 +7,7 @@ Se publica con GitHub Pages desde la rama `gh-pages` y se usa en el iPhone agreg
 
 - Muestra el monto pendiente de cada crédito y el total de los créditos de consumo.
 - Permite registrar el pago de cada cuota y recalcula el monto pendiente.
+- Admite deudas con abonos libres (sin interés ni cuotas): se anota el monto de cada abono y se descuenta del pendiente.
 - Guarda los datos solo en el dispositivo (`localStorage`). Este repositorio no contiene datos de ningún crédito.
 - Incluye respaldo e importación mediante un código de texto.
 - Funciona sin conexión después de la primera carga (`sw.js`).
@@ -15,6 +16,7 @@ Se publica con GitHub Pages desde la rama `gh-pages` y se usa en el iPhone agreg
 
 Monto pendiente = cuota × ((1 + i)^D − 1) / (i × (1 + i)^D) + ajuste, donde `i` es la tasa mensual y `D` las cuotas pendientes.
 Los créditos en pesos se redondean a $10.000 y el total de consumo a $100.000. El hipotecario se muestra en UF con dos decimales.
+En las deudas con abonos libres, monto pendiente = pendiente al ingresarla − suma de los abonos, sin redondeo; no se suman al total.
 
 ## Archivos
 

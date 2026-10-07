@@ -125,6 +125,8 @@ button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 
 .cr-talon{border-top:2px dashed var(--line);padding:14px 18px 6px;display:flex;flex-direction:column;align-items:stretch;gap:2px}
 .cr-listo{color:var(--ok);font-weight:600;text-align:center;padding:10px 0}
+.cr-barra{height:12px}
+.cr-barra span{transition:none}
 
 .cr-detalle{border-top:1px solid var(--line);background:var(--inset);padding:18px;display:flex;flex-direction:column;gap:24px}
 .bloque{display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -227,6 +229,11 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
 .seg label{display:grid;place-items:center;min-height:42px;padding:0 12px;border-radius:9px;font-size:14px;font-weight:600;color:var(--ink-2);cursor:pointer;text-align:center}
 .seg input:checked+label{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px var(--line)}
 .seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:1px}
+.seg.tres label{padding:0 6px;font-size:13.5px}
+.campo>.seg{flex:0 0 auto}
+.seg input:disabled+label{opacity:.4;cursor:default}
+.grupo-campos{display:flex;flex-direction:column;gap:16px}
+.pagos .pg-s{color:var(--ink-2);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .avanzado{display:flex;flex-direction:column}
 .avanzado .campo{padding-top:6px}
 .ayuda{font-size:13px;color:var(--ink-2);margin-top:-8px;display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap}
@@ -284,7 +291,7 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
   </section>
 
   <footer class="pie">
-    <p>El monto pendiente es el valor presente de las cuotas que faltan, a la tasa de cada crédito, redondeado a $10.000. El total suma solo los créditos de consumo y se redondea a $100.000. El hipotecario se muestra en UF, sin redondear.</p>
+    <p>El monto pendiente es el valor presente de las cuotas que faltan, a la tasa de cada crédito, redondeado a $10.000. El total suma solo los créditos de consumo y se redondea a $100.000. El hipotecario se muestra en UF, sin redondear. Las deudas con abonos libres no tienen interés: bajan en el monto exacto de cada abono y tampoco se suman al total.</p>
   </footer>
 </div>
 
@@ -313,6 +320,31 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
   </form>
 </dialog>
 
+<dialog class="sheet" id="dlg-abono" aria-labelledby="abono-tit">
+  <form class="sheet-in" id="form-abono" novalidate>
+    <div class="sheet-cab">
+      <h2 id="abono-tit">Registrar abono</h2>
+      <button type="button" class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    </div>
+    <p class="sheet-sub" id="abono-sub"></p>
+    <label class="campo" for="abono-monto">
+      <span class="campo-lab">Monto abonado</span>
+      <span class="con-ad"><i>$</i><input type="text" id="abono-monto" inputmode="numeric" autocomplete="off" placeholder="200.000"></span>
+    </label>
+    <label class="campo" for="abono-fecha">
+      <span class="campo-lab">Fecha del abono</span>
+      <input type="date" id="abono-fecha">
+    </label>
+    <div class="cambio">
+      <div><span class="label">Pendiente actual</span><b id="abono-antes"></b></div>
+      <span class="flecha" aria-hidden="true">→</span>
+      <div class="nuevo"><span class="label">Nuevo pendiente</span><b id="abono-despues"></b></div>
+    </div>
+    <p class="error" id="abono-error" role="alert" hidden></p>
+    <button type="submit" class="btn btn-primary btn-xl" id="abono-ok">Confirmar abono</button>
+  </form>
+</dialog>
+
 <dialog class="sheet" id="dlg-credito" aria-labelledby="cred-tit">
   <form class="sheet-in" id="form-credito" novalidate>
     <div class="sheet-cab">
@@ -325,11 +357,14 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
     </label>
     <div class="campo">
       <span class="campo-lab" id="f-cred-lab">Tipo de crédito</span>
-      <div class="seg" role="radiogroup" aria-labelledby="f-cred-lab">
-        <input type="radio" name="f-cred" id="f-cred-c" value="consumo" checked><label for="f-cred-c">Consumo, en pesos</label>
-        <input type="radio" name="f-cred" id="f-cred-h" value="hipotecario"><label for="f-cred-h">Hipotecario, en UF</label>
+      <div class="seg tres" role="radiogroup" aria-labelledby="f-cred-lab">
+        <input type="radio" name="f-cred" id="f-cred-c" value="consumo" checked><label for="f-cred-c">Consumo</label>
+        <input type="radio" name="f-cred" id="f-cred-h" value="hipotecario"><label for="f-cred-h">Hipotecario</label>
+        <input type="radio" name="f-cred" id="f-cred-a" value="abonos"><label for="f-cred-a">Abonos libres</label>
       </div>
     </div>
+    <p class="ayuda" id="f-cred-nota"></p>
+    <div class="grupo-campos" id="f-bloque-cuotas">
     <label class="campo" for="f-cuota">
       <span class="campo-lab">Cuota mensual</span>
       <span class="con-ad"><i id="f-cuota-pre">$</i><input type="text" id="f-cuota" inputmode="numeric" autocomplete="off" placeholder="174.500"></span>
@@ -363,6 +398,18 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
       </label>
     </details>
     <p class="ayuda vista" id="f-vista"></p>
+    </div>
+    <div class="grupo-campos" id="f-bloque-abonos" hidden>
+      <label class="campo" for="f-inicial">
+        <span class="campo-lab">Monto inicial de la deuda</span>
+        <span class="con-ad"><i>$</i><input type="text" id="f-inicial" inputmode="numeric" autocomplete="off" placeholder="10.000.000"></span>
+      </label>
+      <label class="campo" for="f-pendiente">
+        <span class="campo-lab">Monto pendiente hoy</span>
+        <span class="con-ad"><i>$</i><input type="text" id="f-pendiente" inputmode="numeric" autocomplete="off" placeholder="2.500.000"></span>
+      </label>
+      <p class="ayuda vista" id="f-abonos-vista"></p>
+    </div>
     <p class="error" id="f-error" role="alert" hidden></p>
     <button type="submit" class="btn btn-primary btn-xl" id="cred-ok">Guardar crédito</button>
   </form>
@@ -456,6 +503,13 @@ function calc(c){
   };
 }
 const pctTexto = m => (m.rem === 0 ? '100%' : Math.min(99, Math.floor(m.pct * 100)) + '%');
+/* Deuda con abonos libres: sin interés ni cuotas. Pendiente = pendiente al ingresarla − suma de los abonos. */
+function calcAbonos(c){
+  const abonado = c.abonos.reduce((a, p) => a + p.monto, 0);
+  const saldo = Math.max(0, c.pendienteBase - abonado), inicial = Math.max(c.montoInicial, c.pendienteBase);
+  return { saldo, inicial, abonado, pagado: inicial - saldo, rem: saldo > 0 ? 1 : 0, pct: inicial > 0 ? limitar((inicial - saldo) / inicial, 0, 1) : 0 };
+}
+const info = c => (c.tipo === 'abonos' ? calcAbonos(c) : calc(c));
 function terminoEstimado(c, m){
   if (m.rem === 0) return null;
   const h = new Date(), ym = h.getFullYear() + '-' + dos(h.getMonth() + 1);
@@ -482,11 +536,15 @@ function norm(id, d){
   d = d || {};
   const plazo = Math.max(1, Math.round(num(d.plazo)));
   const pagos = Array.isArray(d.pagos) ? d.pagos.filter(p => p && typeof p === 'object').map(p => ({ fecha: String(p.fecha || '') })) : [];
+  const abonos = Array.isArray(d.abonos) ? d.abonos.filter(p => p && typeof p === 'object' && num(p.monto) > 0).map(p => ({ fecha: String(p.fecha || ''), monto: Math.round(num(p.monto)) })) : [];
+  const tipo = d.tipo === 'hipotecario' ? 'hipotecario' : (d.tipo === 'abonos' ? 'abonos' : 'consumo');
   return {
     id: String(id), nombre: String(d.nombre || 'Crédito'),
-    tipo: d.tipo === 'hipotecario' ? 'hipotecario' : 'consumo', moneda: d.moneda === 'UF' ? 'UF' : 'CLP',
+    tipo, moneda: tipo !== 'abonos' && d.moneda === 'UF' ? 'UF' : 'CLP',
     cuota: Math.max(0, num(d.cuota)), plazo, tasa: Math.max(0, num(d.tasa)), tasaTipo: d.tasaTipo === 'anual' ? 'anual' : 'mensual',
-    ajuste: num(d.ajuste), pagadasInicial: limitar(Math.round(num(d.pagadasInicial)), 0, plazo), pagos, creado: num(d.creado)
+    ajuste: num(d.ajuste), pagadasInicial: limitar(Math.round(num(d.pagadasInicial)), 0, plazo), pagos,
+    montoInicial: Math.max(0, Math.round(num(d.montoInicial))), pendienteBase: Math.max(0, Math.round(num(d.pendienteBase))), abonos,
+    creado: num(d.creado)
   };
 }
 function aplicar(lista){
@@ -530,7 +588,8 @@ const deB64 = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.lengt
 const huella = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(36); };
 function codigoRespaldo(){
   const cuerpo = aB64(JSON.stringify({ v: 1, creditos: S.credits.map(c => ({ nombre: c.nombre, tipo: c.tipo, moneda: c.moneda, cuota: c.cuota, plazo: c.plazo,
-    tasa: c.tasa, tasaTipo: c.tasaTipo, ajuste: c.ajuste, pagadasInicial: c.pagadasInicial, pagos: c.pagos, creado: c.creado })) }));
+    tasa: c.tasa, tasaTipo: c.tasaTipo, ajuste: c.ajuste, pagadasInicial: c.pagadasInicial, pagos: c.pagos,
+    montoInicial: c.montoInicial, pendienteBase: c.pendienteBase, abonos: c.abonos, creado: c.creado })) }));
   return 'MC1:' + cuerpo + '.' + huella(cuerpo);
 }
 function leerCodigo(texto){
@@ -543,7 +602,7 @@ function leerCodigo(texto){
   } else obj = JSON.parse(t);
   const arr = Array.isArray(obj) ? obj : (obj && Array.isArray(obj.creditos) ? obj.creditos : null);
   if (!arr || !arr.length) throw new Error('sin créditos');
-  return arr.map((d, i) => { const c = norm(nuevoId() + i, d); if (!(c.cuota > 0)) throw new Error('cuota'); return c; });
+  return arr.map((d, i) => { const c = norm(nuevoId() + i, d); if (!((c.tipo === 'abonos' ? c.montoInicial : c.cuota) > 0)) throw new Error('datos'); return c; });
 }
 const porId = id => S.credits.find(c => c.id === id);
 
@@ -560,7 +619,7 @@ function renderResumen(){
   const t = totales();
   if (!t.n) {
     total.textContent = '$0'; fill.style.width = '0%'; datos.hidden = true;
-    nota.textContent = S.credits.length ? 'No hay créditos de consumo ingresados. El hipotecario no se suma a este total.'
+    nota.textContent = S.credits.length ? 'No hay créditos de consumo ingresados. Los demás no se suman a este total.'
       : 'Agrega tu primer crédito para ver aquí cuánto te falta por pagar.';
     return;
   }
@@ -664,17 +723,69 @@ function detalleHTML(c, m){
 
   h += tablaHTML(c, m);
 
-  h += '<div class="cr-acciones">';
-  if (S.confirmar === c.id) {
-    h += '<div class="confirma"><p>¿Eliminar «' + esc(c.nombre) + '» y sus pagos registrados? No se puede deshacer.</p><div>' +
-      '<button type="button" class="btn btn-danger" data-act="eliminar-si" data-id="' + esc(c.id) + '">Sí, eliminar</button>' +
-      '<button type="button" class="btn btn-quiet" data-act="eliminar-no">Cancelar</button></div></div>';
-  } else {
-    h += '<button type="button" class="btn btn-quiet" data-act="editar" data-id="' + esc(c.id) + '">Editar datos</button>' +
-      '<button type="button" class="btn peligro" data-act="eliminar" data-id="' + esc(c.id) + '">Eliminar crédito</button>';
-  }
-  h += '</div></div>';
+  h += accionesHTML(c) + '</div>';
   return h;
+}
+
+function accionesHTML(c){
+  if (S.confirmar === c.id) {
+    return '<div class="cr-acciones"><div class="confirma"><p>¿Eliminar «' + esc(c.nombre) + '» y sus pagos registrados? No se puede deshacer.</p><div>' +
+      '<button type="button" class="btn btn-danger" data-act="eliminar-si" data-id="' + esc(c.id) + '">Sí, eliminar</button>' +
+      '<button type="button" class="btn btn-quiet" data-act="eliminar-no">Cancelar</button></div></div></div>';
+  }
+  return '<div class="cr-acciones"><button type="button" class="btn btn-quiet" data-act="editar" data-id="' + esc(c.id) + '">Editar datos</button>' +
+    '<button type="button" class="btn peligro" data-act="eliminar" data-id="' + esc(c.id) + '">Eliminar crédito</button></div>';
+}
+
+/* ----- deudas con abonos libres ----- */
+function detalleAbonosHTML(c, m){
+  const n = c.abonos.length;
+  let h = '<div class="cr-detalle">' +
+    '<section class="bloque"><h4>Resumen de la deuda</h4><dl class="filas">' +
+      '<div><dt>Monto inicial</dt><dd>' + plata(m.inicial) + '</dd></div>' +
+      '<div class="sub"><dt>Pagado antes de registrarla aquí</dt><dd>' + plata(m.inicial - c.pendienteBase) + '</dd></div>' +
+      '<div class="sub"><dt>Abonado aquí' + (n ? ' (' + n + (n === 1 ? ' abono)' : ' abonos)') : '') + '</dt><dd>' + plata(m.abonado) + '</dd></div>' +
+      '<div><dt>Monto pendiente</dt><dd>' + plata(m.saldo) + '</dd></div>' +
+    '</dl><p class="nota">Deuda sin interés: el pendiente baja en el monto exacto de cada abono.</p></section>';
+
+  h += '<section class="bloque"><h4>Abonos registrados</h4><ul class="pagos">';
+  if (!n) h += '<li class="previo">Aún no registras abonos aquí.</li>';
+  let queda = c.pendienteBase;
+  const tras = c.abonos.map(p => (queda = Math.max(0, queda - p.monto)));
+  for (let q = n - 1; q >= 0; q--) {
+    h += '<li><span><span class="pg-n">' + plata(c.abonos[q].monto) + '</span><span class="pg-f">' + esc(fechaCorta(c.abonos[q].fecha)) + '</span></span>' +
+      (q === n - 1 ? '<button type="button" class="btn-mini" data-act="deshacer" data-id="' + esc(c.id) + '">Deshacer</button>'
+                   : '<span class="pg-s">queda ' + plata(tras[q]) + '</span>') + '</li>';
+  }
+  h += '</ul></section>';
+
+  h += accionesHTML(c) + '</div>';
+  return h;
+}
+
+function tarjetaAbonosHTML(c){
+  const m = calcAbonos(c), abierto = S.abiertos.has(c.id);
+  const ultimo = c.abonos.length ? fechaCorta(c.abonos[c.abonos.length - 1].fecha) : 'Sin abonos';
+  return '<article class="credito" data-credito="' + esc(c.id) + '">' +
+    '<div class="cr-cuerpo">' +
+      '<div class="cr-cab"><h3 class="cr-nombre">' + esc(c.nombre) + '</h3>' + (m.rem === 0 ? '<span class="pill pill-ok">Pagado</span>' : '') + '</div>' +
+      '<div class="cr-saldo"><div><p class="label">Monto pendiente</p><p class="cr-monto" data-saldo>' + plata(m.saldo) + '</p></div>' +
+        '<p class="cr-de"><strong>' + pctTexto(m) + ' pagado</strong> de ' + plata(m.inicial) + ' iniciales</p></div>' +
+      '<div class="barra cr-barra" role="img" aria-label="Pagado: ' + pctTexto(m) + '"><span style="width:' + (m.pct * 100).toFixed(2) + '%"></span></div>' +
+      '<dl class="datos">' +
+        '<div><dt>Pagado hasta hoy</dt><dd>' + plata(m.pagado) + '</dd></div>' +
+        '<div><dt>Último abono</dt><dd>' + esc(ultimo) + '</dd></div>' +
+        '<div><dt>Tasa de interés</dt><dd>0%</dd></div>' +
+      '</dl>' +
+    '</div>' +
+    '<div class="cr-talon">' +
+      (m.rem > 0
+        ? '<button type="button" class="btn btn-primary" data-act="abonar" data-id="' + esc(c.id) + '">Registrar abono</button>'
+        : '<p class="cr-listo">Deuda pagada por completo.</p>') +
+      '<button type="button" class="btn btn-link" data-act="detalle" data-id="' + esc(c.id) + '" aria-expanded="' + abierto + '">' + (abierto ? 'Ocultar detalle' : 'Ver detalle') + '</button>' +
+    '</div>' +
+    (abierto ? detalleAbonosHTML(c, m) : '') +
+  '</article>';
 }
 
 function tarjetaHTML(c){
@@ -715,15 +826,17 @@ function renderLista(){
       '<button type="button" class="btn btn-quiet" data-act="importar">Importar datos</button></div></div>';
     return;
   }
-  const cons = S.credits.filter(c => c.tipo === 'consumo'), hip = S.credits.filter(c => c.tipo !== 'consumo');
+  const de = t => S.credits.filter(c => c.tipo === t);
+  const cons = de('consumo'), abo = de('abonos'), hip = de('hipotecario');
   let h = '';
   if (cons.length) h += '<div class="grupo"><div class="grupo-cab"><h2>Créditos de consumo</h2><span>suman al total</span></div><div class="grupo-tarjetas">' + cons.map(tarjetaHTML).join('') + '</div></div>';
+  if (abo.length) h += '<div class="grupo"><div class="grupo-cab"><h2>Deudas personales</h2><span>abonos libres · no se suman al total</span></div><div class="grupo-tarjetas">' + abo.map(tarjetaAbonosHTML).join('') + '</div></div>';
   if (hip.length) h += '<div class="grupo"><div class="grupo-cab"><h2>Crédito hipotecario</h2><span>en UF · no se suma al total</span></div><div class="grupo-tarjetas">' + hip.map(tarjetaHTML).join('') + '</div></div>';
   lista.innerHTML = h + '<button type="button" class="mas" data-act="agregar">Agregar otro crédito</button>';
   if (S.sello) {
     const s = S.sello; S.sello = null;
     const tarjeta = lista.querySelector('[data-credito="' + s.id + '"]'), c = porId(s.id);
-    if (tarjeta && c && !sinMovimiento) animarNumero($('[data-saldo]', tarjeta), s.desde, calc(c).saldo, v => dinero(v, c.moneda));
+    if (tarjeta && c && !sinMovimiento) animarNumero($('[data-saldo]', tarjeta), s.desde, info(c).saldo, v => dinero(v, c.moneda));
   }
 }
 
@@ -754,10 +867,10 @@ $('#toast-btn').addEventListener('click', () => { const f = toastFn; $('#toast')
 const errorGuardar = () => avisar('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
 
 /* ================= hojas ================= */
-const dlgPago = $('#dlg-pago'), dlgCred = $('#dlg-credito'), dlgImp = $('#dlg-importar'), dlgResp = $('#dlg-respaldo');
+const dlgPago = $('#dlg-pago'), dlgCred = $('#dlg-credito'), dlgImp = $('#dlg-importar'), dlgResp = $('#dlg-respaldo'), dlgAbono = $('#dlg-abono');
 function abrir(d){ if (typeof d.showModal === 'function') { if (!d.open) d.showModal(); } else d.setAttribute('open', ''); }
 function cerrar(d){ if (typeof d.close === 'function') { if (d.open) d.close(); } else d.removeAttribute('open'); }
-[dlgPago, dlgCred, dlgImp, dlgResp].forEach(d => {
+[dlgPago, dlgCred, dlgImp, dlgResp, dlgAbono].forEach(d => {
   d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-cerrar]')) cerrar(d); });
 });
 
@@ -791,16 +904,67 @@ $('#form-pago').addEventListener('submit', async e => {
   S.ocupado = false;
 });
 async function deshacer(id){
-  const c = porId(id); if (!c || !c.pagos.length || S.ocupado) return;
+  const c = porId(id); if (!c || S.ocupado) return;
+  const esAbono = c.tipo === 'abonos', lista = esAbono ? c.abonos : c.pagos;
+  if (!lista.length) return;
   S.ocupado = true;
-  try { await Store.cambiar(id, { pagos: c.pagos.slice(0, -1) }); avisar('Se deshizo el último pago.'); } catch (err) { errorGuardar(); }
+  try {
+    await Store.cambiar(id, esAbono ? { abonos: lista.slice(0, -1) } : { pagos: lista.slice(0, -1) });
+    avisar(esAbono ? 'Se deshizo el último abono.' : 'Se deshizo el último pago.');
+  } catch (err) { errorGuardar(); }
   S.ocupado = false;
 }
 
+/* ----- registrar abono (deudas con abonos libres) ----- */
+const A = { monto: $('#abono-monto'), fecha: $('#abono-fecha') };
+const formatoMiles = inp => { const d = soloDigitos(inp.value).replace(/^0+(?=\d)/, ''); inp.value = d ? miles(parseInt(d, 10)) : ''; };
+function vistaAbono(){
+  const c = porId(S.pagoId); if (!c) return;
+  const m = calcAbonos(c), monto = aEntero(A.monto.value);
+  $('#abono-despues').textContent = monto > 0 && monto <= m.saldo ? plata(m.saldo - monto) : '—';
+}
+function abrirAbono(id){
+  const c = porId(id); if (!c || c.tipo !== 'abonos') return;
+  const m = calcAbonos(c); if (m.rem === 0) return;
+  S.pagoId = id;
+  $('#abono-sub').textContent = c.nombre + ' · sin interés';
+  A.monto.value = ''; A.fecha.value = hoyISO();
+  $('#abono-antes').textContent = plata(m.saldo);
+  $('#abono-error').hidden = true;
+  vistaAbono();
+  abrir(dlgAbono);
+  A.monto.focus();
+}
+A.monto.addEventListener('input', () => { formatoMiles(A.monto); $('#abono-error').hidden = true; vistaAbono(); });
+$('#form-abono').addEventListener('submit', async e => {
+  e.preventDefault();
+  const c = porId(S.pagoId); if (!c || c.tipo !== 'abonos' || S.ocupado) return;
+  const m = calcAbonos(c), monto = aEntero(A.monto.value), err = $('#abono-error');
+  const falla = msg => { err.textContent = msg; err.hidden = false; A.monto.focus(); };
+  if (!(monto > 0)) return falla('Ingresa el monto abonado.');
+  if (monto > m.saldo) return falla('El abono supera el monto pendiente (' + plata(m.saldo) + ').');
+  const fecha = /^\d{4}-\d{2}-\d{2}$/.test(A.fecha.value) ? A.fecha.value : hoyISO();
+  const nuevo = m.saldo - monto;
+  S.ocupado = true;
+  S.sello = { id: c.id, n: -1, desde: m.saldo, totalDesde: totales().saldo };
+  cerrar(dlgAbono);
+  try {
+    await Store.cambiar(c.id, { abonos: c.abonos.concat([{ fecha, monto }]) });
+    avisar(nuevo === 0 ? 'Abono registrado. Terminaste de pagar esta deuda.' : 'Abono registrado. Nuevo pendiente: ' + plata(nuevo), 'Deshacer', () => deshacer(c.id));
+  } catch (err2) { S.sello = null; errorGuardar(); }
+  S.ocupado = false;
+});
+
 /* ----- agregar o editar crédito ----- */
-const F = { nombre: $('#f-nombre'), cuota: $('#f-cuota'), plazo: $('#f-plazo'), pagadas: $('#f-pagadas'), tasa: $('#f-tasa'), ajuste: $('#f-ajuste') };
+const F = { nombre: $('#f-nombre'), cuota: $('#f-cuota'), plazo: $('#f-plazo'), pagadas: $('#f-pagadas'), tasa: $('#f-tasa'), ajuste: $('#f-ajuste'),
+            inicial: $('#f-inicial'), pendiente: $('#f-pendiente') };
+const NOTAS_TIPO = {
+  consumo: 'Cuota fija mensual, en pesos. Suma al total.',
+  hipotecario: 'Cuota fija mensual, en UF. No se suma al total.',
+  abonos: 'Deuda sin interés que pagas en montos variables. No se suma al total.'
+};
 const tipoTasa = () => ($('#f-tipo-a').checked ? 'anual' : 'mensual');
-const tipoCred = () => ($('#f-cred-h').checked ? 'hipotecario' : 'consumo');
+const tipoCred = () => ($('#f-cred-a').checked ? 'abonos' : ($('#f-cred-h').checked ? 'hipotecario' : 'consumo'));
 const monedaForm = () => (tipoCred() === 'hipotecario' ? 'UF' : 'CLP');
 const leerCuota = () => (monedaForm() === 'UF' ? aDecimal(F.cuota.value) : aEntero(F.cuota.value));
 function leerAjuste(){
@@ -810,24 +974,33 @@ function leerAjuste(){
   return isNaN(v) ? NaN : (neg ? -v : v);
 }
 function ajustarMoneda(){
-  const uf = monedaForm() === 'UF';
+  const t = tipoCred(), uf = monedaForm() === 'UF';
   $('#f-cuota-pre').textContent = uf ? 'UF' : '$';
   F.cuota.setAttribute('inputmode', uf ? 'decimal' : 'numeric');
   F.cuota.placeholder = uf ? '12,5' : '174.500';
+  $('#f-bloque-cuotas').hidden = t === 'abonos';
+  $('#f-bloque-abonos').hidden = t !== 'abonos';
+  $('#f-cred-nota').textContent = NOTAS_TIPO[t];
 }
 function abrirCredito(id){
   const c = id ? porId(id) : null;
   S.editId = c ? c.id : null;
   $('#cred-tit').textContent = c ? 'Editar crédito' : 'Agregar crédito';
   $('#cred-ok').textContent = c ? 'Guardar cambios' : 'Guardar crédito';
-  const uf = !!c && c.moneda === 'UF';
+  const uf = !!c && c.moneda === 'UF', esAb = !!c && c.tipo === 'abonos', enCuotas = !!c && !esAb;
   $('#f-cred-c').checked = !c || c.tipo === 'consumo';
-  $('#f-cred-h').checked = !!c && c.tipo !== 'consumo';
+  $('#f-cred-h').checked = !!c && c.tipo === 'hipotecario';
+  $('#f-cred-a').checked = esAb;
+  // al editar no se cambia entre crédito en cuotas y deuda con abonos: sus datos son distintos
+  $('#f-cred-c').disabled = $('#f-cred-h').disabled = esAb;
+  $('#f-cred-a').disabled = enCuotas;
   F.nombre.value = c ? c.nombre : '';
-  F.cuota.value = c && c.cuota ? (uf ? coma(c.cuota, 5) : miles(c.cuota)) : '';
-  F.plazo.value = c ? c.plazo : '';
-  F.pagadas.value = c ? Math.min(c.plazo, c.pagadasInicial + c.pagos.length) : '';
-  F.tasa.value = c ? coma(c.tasa, 4) : '';
+  F.cuota.value = enCuotas && c.cuota ? (uf ? coma(c.cuota, 5) : miles(c.cuota)) : '';
+  F.plazo.value = enCuotas ? c.plazo : '';
+  F.pagadas.value = enCuotas ? Math.min(c.plazo, c.pagadasInicial + c.pagos.length) : '';
+  F.tasa.value = enCuotas ? coma(c.tasa, 4) : '';
+  F.inicial.value = esAb ? miles(c.montoInicial) : '';
+  F.pendiente.value = esAb ? miles(calcAbonos(c).saldo) : '';
   F.ajuste.value = c && c.ajuste ? (c.ajuste < 0 ? '-' : '') + (uf ? coma(Math.abs(c.ajuste), 4) : miles(c.ajuste)) : '';
   $('#f-avanzado').open = !!(c && c.ajuste);
   $('#f-tipo-m').checked = !c || c.tasaTipo !== 'anual';
@@ -836,7 +1009,14 @@ function abrirCredito(id){
   ajustarMoneda(); ayudas();
   abrir(dlgCred);
 }
+const leerPendiente = () => (F.pendiente.value.trim() === '' ? NaN : aEntero(F.pendiente.value));
 function ayudas(){
+  if (tipoCred() === 'abonos') {
+    const ini = aEntero(F.inicial.value), pen = leerPendiente();
+    $('#f-abonos-vista').innerHTML = ini > 0 && pen >= 0 && pen <= ini
+      ? '<span>Pagado hasta ahora: <strong>' + plata(ini - pen) + '</strong> (' + Math.floor((ini - pen) / ini * 100) + '%)</span>' : '';
+    return;
+  }
   const cuota = leerCuota(), plazo = aEntero(F.plazo.value), tasa = aDecimal(F.tasa.value), ajuste = leerAjuste(), mon = monedaForm();
   const pag = F.pagadas.value.trim() === '' ? 0 : aEntero(F.pagadas.value);
   const okCuotas = plazo > 0 && pag >= 0 && pag <= plazo;
@@ -854,7 +1034,8 @@ F.cuota.addEventListener('input', () => {
   const d = soloDigitos(F.cuota.value).replace(/^0+(?=\d)/, ''); F.cuota.value = d ? miles(parseInt(d, 10)) : '';
 });
 [F.plazo, F.pagadas].forEach(inp => inp.addEventListener('input', () => { inp.value = soloDigitos(inp.value).slice(0, 3); }));
-['f-cred-c', 'f-cred-h'].forEach(id => $('#' + id).addEventListener('change', () => { F.cuota.value = ''; ajustarMoneda(); }));
+[F.inicial, F.pendiente].forEach(inp => inp.addEventListener('input', () => formatoMiles(inp)));
+['f-cred-c', 'f-cred-h', 'f-cred-a'].forEach(id => $('#' + id).addEventListener('change', () => { F.cuota.value = ''; ajustarMoneda(); }));
 $('#form-credito').addEventListener('input', ayudas);
 $('#form-credito').addEventListener('change', ayudas);
 $('#form-credito').addEventListener('submit', async e => {
@@ -862,25 +1043,35 @@ $('#form-credito').addEventListener('submit', async e => {
   if (S.ocupado) return;
   const err = $('#f-error');
   const falla = (msg, campo) => { err.textContent = msg; err.hidden = false; if (campo) campo.focus(); };
-  const cuota = leerCuota(), plazo = aEntero(F.plazo.value), tasa = aDecimal(F.tasa.value), ajuste = leerAjuste();
-  const pagadas = F.pagadas.value.trim() === '' ? 0 : aEntero(F.pagadas.value);
-  if (!(cuota > 0)) return falla('Ingresa el valor de la cuota mensual.', F.cuota);
-  if (!(plazo >= 1 && plazo <= 600)) return falla('Ingresa el plazo en número de cuotas.', F.plazo);
-  if (!(pagadas >= 0 && pagadas <= plazo)) return falla('Las cuotas pagadas no pueden superar el plazo.', F.pagadas);
-  if (F.tasa.value.trim() === '') return falla('Ingresa la tasa de interés. Usa 0 si el crédito no tiene interés.', F.tasa);
-  if (!(tasa >= 0 && tasa <= 100)) return falla('Revisa la tasa de interés. Escribe solo el número, por ejemplo 1,2.', F.tasa);
-  if (isNaN(ajuste)) { $('#f-avanzado').open = true; return falla('Revisa el ajuste. Escribe solo un número, por ejemplo -37000.', F.ajuste); }
   const previo = S.editId ? porId(S.editId) : null;
-  let pagos = previo ? previo.pagos.slice() : [], pagadasInicial = pagadas;
-  if (previo) {
-    if (pagadas >= pagos.length) pagadasInicial = pagadas - pagos.length;
-    else { pagos = pagos.slice(0, pagadas); pagadasInicial = 0; }
+  const numero = S.credits.length + (previo ? 0 : 1), creado = previo && previo.creado ? previo.creado : Date.now();
+  let data;
+  if (tipoCred() === 'abonos') {
+    const ini = aEntero(F.inicial.value), pen = leerPendiente();
+    if (!(ini > 0)) return falla('Ingresa el monto inicial de la deuda.', F.inicial);
+    if (!(pen >= 0)) return falla('Ingresa el monto pendiente hoy. Usa 0 si ya está pagada.', F.pendiente);
+    if (pen > ini) return falla('El monto pendiente no puede ser mayor que el monto inicial.', F.pendiente);
+    // el pendiente que se escribe es el de hoy; se conserva el historial de abonos ya registrados
+    const abonos = previo && previo.tipo === 'abonos' ? previo.abonos.slice() : [];
+    const abonado = abonos.reduce((a, p) => a + p.monto, 0);
+    if (pen + abonado > ini) return falla('Con los abonos ya registrados (' + plata(abonado) + '), el pendiente no puede superar ' + plata(ini - abonado) + '.', F.pendiente);
+    data = { nombre: F.nombre.value.trim() || ('Deuda ' + numero), tipo: 'abonos', moneda: 'CLP', montoInicial: ini, pendienteBase: pen + abonado, abonos, creado };
+  } else {
+    const cuota = leerCuota(), plazo = aEntero(F.plazo.value), tasa = aDecimal(F.tasa.value), ajuste = leerAjuste();
+    const pagadas = F.pagadas.value.trim() === '' ? 0 : aEntero(F.pagadas.value);
+    if (!(cuota > 0)) return falla('Ingresa el valor de la cuota mensual.', F.cuota);
+    if (!(plazo >= 1 && plazo <= 600)) return falla('Ingresa el plazo en número de cuotas.', F.plazo);
+    if (!(pagadas >= 0 && pagadas <= plazo)) return falla('Las cuotas pagadas no pueden superar el plazo.', F.pagadas);
+    if (F.tasa.value.trim() === '') return falla('Ingresa la tasa de interés. Usa 0 si el crédito no tiene interés.', F.tasa);
+    if (!(tasa >= 0 && tasa <= 100)) return falla('Revisa la tasa de interés. Escribe solo el número, por ejemplo 1,2.', F.tasa);
+    if (isNaN(ajuste)) { $('#f-avanzado').open = true; return falla('Revisa el ajuste. Escribe solo un número, por ejemplo -37000.', F.ajuste); }
+    let pagos = previo ? previo.pagos.slice() : [], pagadasInicial = pagadas;
+    if (previo) {
+      if (pagadas >= pagos.length) pagadasInicial = pagadas - pagos.length;
+      else { pagos = pagos.slice(0, pagadas); pagadasInicial = 0; }
+    }
+    data = { nombre: F.nombre.value.trim() || ('Crédito ' + numero), tipo: tipoCred(), moneda: monedaForm(), cuota, plazo, tasa, tasaTipo: tipoTasa(), ajuste, pagadasInicial, pagos, creado };
   }
-  const data = {
-    nombre: F.nombre.value.trim() || ('Crédito ' + (S.credits.length + (previo ? 0 : 1))),
-    tipo: tipoCred(), moneda: monedaForm(), cuota, plazo, tasa, tasaTipo: tipoTasa(), ajuste, pagadasInicial, pagos,
-    creado: previo && previo.creado ? previo.creado : Date.now()
-  };
   err.hidden = true;
   S.ocupado = true;
   const id = previo ? previo.id : nuevoId();
@@ -934,6 +1125,7 @@ document.addEventListener('click', async e => {
   if (act === 'importar') return abrirImportar();
   if (act === 'respaldo') return abrirRespaldo();
   if (act === 'pagar') return abrirPago(id);
+  if (act === 'abonar') return abrirAbono(id);
   if (act === 'editar') return abrirCredito(id);
   if (act === 'deshacer') return deshacer(id);
   if (act === 'detalle') { if (S.abiertos.has(id)) S.abiertos.delete(id); else S.abiertos.add(id); S.confirmar = null; return renderLista(); }
