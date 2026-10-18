@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#DFE9FD" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#13244A" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=ds1">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=ds1">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
 @font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(fonts/bricolage-grotesque.woff2) format("woff2")}
@@ -387,7 +387,7 @@ button, input, select, textarea { font-family: inherit; }
 :focus-visible { outline-color: var(--ds-tint); }
 input, select, textarea { accent-color: var(--ds-btn); caret-color: var(--ds-tint); }
 @keyframes ds-rise { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
-.mark.app-icon, img.app-icon { display: block; padding: 0; background: none; object-fit: cover; border-radius: 23%; box-shadow: 0 0 0 0.5px rgba(14, 27, 51, 0.08), 0 4px 12px rgba(41, 80, 244, 0.25); }
+.mark.app-icon, img.app-icon { display: block; overflow: hidden; padding: 0; background: none; object-fit: cover; border-radius: 23%; box-shadow: 0 0 0 0.5px rgba(14, 27, 51, 0.08), 0 4px 12px rgba(41, 80, 244, 0.25); }
 /* ── fin de la base común ── */
 
 /* Mis créditos */
