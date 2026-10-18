@@ -9,8 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mis Créditos">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#EDF0F6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0D111E" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#DFE9FD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13244A" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -20,35 +20,146 @@
 @font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url(fonts/jetbrains-mono.woff2) format("woff2")}
 /* Layout: columna única pensada para iPhone. Arriba, el total de consumo sobre el fondo. Debajo, cada crédito es una
    cuponera: un cupón por cuota (12 por fila = un año) y un talón de acción separado por una línea punteada. */
-:root{
-  --bg:#EDF0F6; --surface:#FFFFFF; --inset:#F5F7FB; --sunken:#E2E6F0; --line:#CDD4E3;
-  --ink:#131A30; --ink-2:#4B5474; --ink-3:#7A83A1;
-  --accent:#2C3BCB; --accent-ink:#FFFFFF; --accent-soft:#DCE0FA;
-  --interest:#B96A12; --ok:#177A50; --ok-soft:#D6F0E3; --danger:#B93226; --danger-soft:#F8DEDA;
-  --shadow:0 1px 2px rgba(19,26,48,.06),0 10px 28px rgba(19,26,48,.07);
-  --font-display:"Bricolage Grotesque","Avenir Next","Helvetica Neue",Arial,sans-serif;
-  --font-body:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+/*DS:TOKENS:START*/
+/* ── Domésticas · sistema de diseño común (v1) ──────────────────────────────
+   Paleta: #2950F4 · #4D78F3 · #719DF6 · #99C2F8 · #BDEBFB, con el azul marino #182D4A de fondo oscuro.
+   Estilo iOS 27: tipografía del sistema (SF Pro), tarjetas blancas sobre fondo agrupado,
+   barras y botones de vidrio, cápsulas, esquinas amplias. Igual en todas las apps de la casa. */
+:root {
+  --ds-b1: #2950F4; --ds-b2: #4D78F3; --ds-b3: #719DF6; --ds-b4: #99C2F8; --ds-b5: #BDEBFB; --ds-navy: #182D4A;
+  --ds-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --ds-font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --ds-font-round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --ds-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --ds-r-card: 24px; --ds-r-inner: 16px; --ds-r-field: 14px; --ds-r-sheet: 34px; --ds-r-pill: 999px;
+
+  --ds-bg: #EFF3FB;
+  --ds-bg-top: #DFE9FD;
+  --ds-surface: #FFFFFF;
+  --ds-surface-2: #F3F6FD;
+  --ds-fill: rgba(41, 80, 244, 0.07);
+  --ds-fill-2: rgba(41, 80, 244, 0.13);
+  --ds-ink: #0E1B33;
+  --ds-ink-2: #55617A;
+  --ds-ink-3: #8691A8;
+  --ds-line: rgba(24, 45, 74, 0.12);
+  --ds-line-2: rgba(24, 45, 74, 0.2);
+  --ds-tint: #2950F4;
+  --ds-tint-soft: #E5ECFE;
+  --ds-btn: #2950F4;
+  --ds-on-btn: #FFFFFF;
+  --ds-pos: #157A43; --ds-pos-soft: #DDF4E6;
+  --ds-neg: #D1281C; --ds-neg-soft: #FDE8E6;
+  --ds-warn: #A35500; --ds-warn-soft: #FFF0D9;
+  --ds-hero: radial-gradient(120% 90% at 100% 0%, rgba(189, 235, 251, 0.45) 0%, rgba(189, 235, 251, 0) 55%), linear-gradient(150deg, #4D78F3 0%, #2950F4 58%, #2141D6 100%);
+  --ds-hero-ink: #FFFFFF;
+  --ds-hero-ink-2: rgba(255, 255, 255, 0.84);
+  --ds-hero-line: rgba(255, 255, 255, 0.28);
+  --ds-hero-glass: rgba(255, 255, 255, 0.18);
+  --ds-glass: rgba(255, 255, 255, 0.7);
+  --ds-glass-strong: rgba(255, 255, 255, 0.86);
+  --ds-glass-line: rgba(255, 255, 255, 0.85);
+  --ds-glass-edge: rgba(14, 27, 51, 0.1);
+  --ds-glass-blur: blur(22px) saturate(1.8);
+  --ds-shadow-1: 0 1px 2px rgba(24, 45, 74, 0.05), 0 4px 14px rgba(24, 45, 74, 0.05);
+  --ds-shadow-2: 0 12px 32px rgba(24, 45, 74, 0.16), 0 2px 8px rgba(24, 45, 74, 0.08);
+  --ds-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 6px 16px rgba(41, 80, 244, 0.26);
+  --ds-scrim: rgba(14, 27, 51, 0.36);
+  --ds-chart-1: #2950F4; --ds-chart-2: #719DF6; --ds-chart-3: #99C2F8; --ds-chart-4: #BDEBFB;
+  color-scheme: light;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0D111E; --surface:#161B2D; --inset:#121727; --sunken:#212945; --line:#2C3455;
-    --ink:#E8EBF7; --ink-2:#A9B1CE; --ink-3:#7780A3;
-    --accent:#8D99FF; --accent-ink:#0D111E; --accent-soft:#262E5C;
-    --interest:#E2A455; --ok:#55C794; --ok-soft:#173A2C; --danger:#F07A6E; --danger-soft:#44201C;
-    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.28);
-    color-scheme:dark;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ds-bg: #0A1224;
+    --ds-bg-top: #13244A;
+    --ds-surface: #152340;
+    --ds-surface-2: #1C2C4D;
+    --ds-fill: rgba(113, 157, 246, 0.12);
+    --ds-fill-2: rgba(113, 157, 246, 0.2);
+    --ds-ink: #EEF3FF;
+    --ds-ink-2: #A9B6D0;
+    --ds-ink-3: #77859F;
+    --ds-line: rgba(189, 235, 251, 0.11);
+    --ds-line-2: rgba(189, 235, 251, 0.2);
+    --ds-tint: #8EB0FA;
+    --ds-tint-soft: rgba(113, 157, 246, 0.18);
+    --ds-btn: #3A62F5;
+    --ds-on-btn: #FFFFFF;
+    --ds-pos: #5DD68E; --ds-pos-soft: rgba(93, 214, 142, 0.14);
+    --ds-neg: #FF8A80; --ds-neg-soft: rgba(255, 138, 128, 0.14);
+    --ds-warn: #FFB65C; --ds-warn-soft: rgba(255, 182, 92, 0.14);
+    --ds-hero: radial-gradient(120% 90% at 100% 0%, rgba(189, 235, 251, 0.28) 0%, rgba(189, 235, 251, 0) 55%), linear-gradient(150deg, #3D68F2 0%, #2950F4 55%, #1C38C2 100%);
+    --ds-glass: rgba(24, 40, 70, 0.62);
+    --ds-glass-strong: rgba(24, 40, 70, 0.84);
+    --ds-glass-line: rgba(255, 255, 255, 0.14);
+    --ds-glass-edge: rgba(0, 0, 0, 0.4);
+    --ds-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --ds-shadow-2: 0 14px 36px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --ds-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 16px rgba(0, 0, 0, 0.35);
+    --ds-scrim: rgba(0, 0, 0, 0.55);
+    --ds-chart-1: #719DF6; --ds-chart-2: #4D78F3; --ds-chart-3: #99C2F8; --ds-chart-4: #BDEBFB;
+    color-scheme: dark;
   }
 }
-:root[data-theme="dark"]{
-  --bg:#0D111E; --surface:#161B2D; --inset:#121727; --sunken:#212945; --line:#2C3455;
-  --ink:#E8EBF7; --ink-2:#A9B1CE; --ink-3:#7780A3;
-  --accent:#8D99FF; --accent-ink:#0D111E; --accent-soft:#262E5C;
-  --interest:#E2A455; --ok:#55C794; --ok-soft:#173A2C; --danger:#F07A6E; --danger-soft:#44201C;
-  --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.28);
-  color-scheme:dark;
+:root[data-theme="dark"] {
+  --ds-bg: #0A1224;
+  --ds-bg-top: #13244A;
+  --ds-surface: #152340;
+  --ds-surface-2: #1C2C4D;
+  --ds-fill: rgba(113, 157, 246, 0.12);
+  --ds-fill-2: rgba(113, 157, 246, 0.2);
+  --ds-ink: #EEF3FF;
+  --ds-ink-2: #A9B6D0;
+  --ds-ink-3: #77859F;
+  --ds-line: rgba(189, 235, 251, 0.11);
+  --ds-line-2: rgba(189, 235, 251, 0.2);
+  --ds-tint: #8EB0FA;
+  --ds-tint-soft: rgba(113, 157, 246, 0.18);
+  --ds-btn: #3A62F5;
+  --ds-on-btn: #FFFFFF;
+  --ds-pos: #5DD68E; --ds-pos-soft: rgba(93, 214, 142, 0.14);
+  --ds-neg: #FF8A80; --ds-neg-soft: rgba(255, 138, 128, 0.14);
+  --ds-warn: #FFB65C; --ds-warn-soft: rgba(255, 182, 92, 0.14);
+  --ds-hero: radial-gradient(120% 90% at 100% 0%, rgba(189, 235, 251, 0.28) 0%, rgba(189, 235, 251, 0) 55%), linear-gradient(150deg, #3D68F2 0%, #2950F4 55%, #1C38C2 100%);
+  --ds-glass: rgba(24, 40, 70, 0.62);
+  --ds-glass-strong: rgba(24, 40, 70, 0.84);
+  --ds-glass-line: rgba(255, 255, 255, 0.14);
+  --ds-glass-edge: rgba(0, 0, 0, 0.4);
+  --ds-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ds-shadow-2: 0 14px 36px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --ds-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 16px rgba(0, 0, 0, 0.35);
+  --ds-scrim: rgba(0, 0, 0, 0.55);
+  --ds-chart-1: #719DF6; --ds-chart-2: #4D78F3; --ds-chart-3: #99C2F8; --ds-chart-4: #BDEBFB;
+  color-scheme: dark;
+}
+html { background: var(--ds-bg); }
+body {
+  font-family: var(--ds-font);
+  background: linear-gradient(180deg, var(--ds-bg-top) 0, var(--ds-bg) 340px) no-repeat, var(--ds-bg);
+  color: var(--ds-ink);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.012em;
+}
+/* ── fin de los tokens comunes ── */
+
+:root {
+  --bg: var(--ds-bg); --surface: var(--ds-surface); --inset: var(--ds-surface-2); --sunken: var(--ds-fill-2); --line: var(--ds-line-2);
+  --ink: var(--ds-ink); --ink-2: var(--ds-ink-2); --ink-3: var(--ds-ink-3);
+  --accent: var(--ds-tint); --accent-ink: #FFFFFF; --accent-soft: var(--ds-tint-soft);
+  --interest: var(--ds-warn); --ok: var(--ds-pos); --ok-soft: var(--ds-pos-soft); --danger: var(--ds-neg); --danger-soft: var(--ds-neg-soft);
+  --shadow: var(--ds-shadow-1);
+  --font-display: var(--ds-font-display); --font-body: var(--ds-font); --font-mono: var(--ds-font-mono);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent-ink: #0A1224;
+  }
+}
+:root[data-theme="dark"] {
+    --accent-ink: #0A1224;
 }
 
+/*DS:TOKENS:END*/
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -259,14 +370,99 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+
+/*DS:LAYER:START*/
+/* ── Domésticas · base común (v1) ── */
+html { background: var(--ds-bg); }
+body {
+  font-family: var(--ds-font);
+  background: linear-gradient(180deg, var(--ds-bg-top) 0, var(--ds-bg) 360px) no-repeat, var(--ds-bg);
+  color: var(--ds-ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3, h4 { font-family: var(--ds-font-display); letter-spacing: -0.022em; }
+button, input, select, textarea { font-family: inherit; }
+::selection { background: var(--ds-tint-soft); }
+:focus-visible { outline-color: var(--ds-tint); }
+input, select, textarea { accent-color: var(--ds-btn); caret-color: var(--ds-tint); }
+@keyframes ds-rise { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mark.app-icon, img.app-icon { display: block; padding: 0; background: none; object-fit: cover; border-radius: 23%; box-shadow: 0 0 0 0.5px rgba(14, 27, 51, 0.08), 0 4px 12px rgba(41, 80, 244, 0.25); }
+/* ── fin de la base común ── */
+
+/* Mis créditos */
+.app { gap: 22px; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+.top { justify-content: flex-start; gap: 12px; }
+.top .mark { width: 46px; height: 46px; flex: none; }
+.top-t { flex: 1; min-width: 0; }
+.eyebrow { margin: 0; font-size: 13px; font-weight: 600; color: var(--ds-ink-2); letter-spacing: -0.005em; }
+.top h1 { font: 700 34px/1.08 var(--ds-font-display); letter-spacing: -0.03em; color: var(--ds-ink); text-transform: none; }
+#btn-agregar { width: 44px; min-height: 44px; padding: 0; flex: none; color: var(--ds-tint); }
+.label, .bloque h4 { font: 600 13px/1.3 var(--ds-font); letter-spacing: -0.005em; text-transform: none; color: var(--ds-ink-2); }
+.btn { font-size: 16px; letter-spacing: -0.01em; transition: transform 0.16s ease, opacity 0.16s ease; }
+.btn:active { transform: scale(0.97); opacity: 0.88; }
+.btn-primary { background: var(--ds-btn); color: #fff; box-shadow: var(--ds-shadow-btn); }
+.btn-quiet { background: var(--ds-surface); color: var(--ds-tint); box-shadow: var(--ds-shadow-1); }
+.btn-link { color: var(--ds-tint); }
+.btn-danger { background: var(--ds-neg); color: #fff; }
+.btn-xl { min-height: 52px; font-size: 17px; }
+.btn-mini { background: var(--ds-tint-soft); box-shadow: none; color: var(--ds-tint); }
+.pill { font: 700 11px/1 var(--ds-font); letter-spacing: 0; text-transform: none; border-radius: 999px; padding: 6px 10px; }
+
+/* Resumen como tarjeta principal */
+.resumen { position: relative; border-radius: 28px; padding: 20px 20px 18px; background: var(--ds-hero); color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -1px 0 rgba(14, 27, 51, 0.16), 0 16px 34px rgba(41, 80, 244, 0.26); }
+.resumen::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 38%); }
+.resumen .label, .res-nota { color: var(--ds-hero-ink-2); }
+.res-nota strong { color: #fff; }
+.total { font-family: var(--ds-font-round); letter-spacing: -0.025em; }
+.resumen .barra { background: rgba(255, 255, 255, 0.24); }
+.resumen .barra span { background: #fff; }
+.resumen .datos { border-top: 1px solid var(--ds-hero-line); }
+.resumen .datos dt { color: var(--ds-hero-ink-2); }
+.resumen .datos dd { color: #fff; }
+
+/* Secciones */
+.grupo-cab h2, .respaldo h2 { font: 700 22px/1.2 var(--ds-font-display); letter-spacing: -0.025em; text-transform: none; color: var(--ds-ink); }
+.grupo-cab span { font-size: 13px; color: var(--ds-ink-2); }
+.credito, .vacio { border: 0; border-radius: var(--ds-r-card); box-shadow: var(--ds-shadow-1); }
+.cr-nombre { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.cr-monto { font-family: var(--ds-font-round); letter-spacing: -0.025em; }
+.cu { border-radius: 6px; font-family: var(--ds-font); font-weight: 600; }
+.cu.p { background: var(--ds-b1); color: #fff; }
+.cu.x { color: var(--ds-tint); box-shadow: inset 0 0 0 2px var(--ds-tint); }
+.cr-avance small { font-family: var(--ds-font); }
+.cr-talon { border-top: 1.5px dashed var(--ds-line-2); }
+.cr-detalle { border-top: 0.5px solid var(--ds-line-2); background: var(--ds-surface-2); }
+.barra { background: var(--ds-fill-2); }
+.barra span { background: linear-gradient(90deg, var(--ds-b3), var(--ds-b1)); }
+.g-txt { font-family: var(--ds-font); }
+.tabla table { font-family: var(--ds-font); }
+.tabla summary::after, .avanzado summary::after { font-family: var(--ds-font); }
+.tabla-scroll { border: 0; box-shadow: var(--ds-shadow-1); }
+.respaldo { border-top: 0; padding-top: 0; }
+.vacio .btn-quiet, .resp-btns .btn-quiet { background: var(--ds-surface); }
+
+/* Hojas */
+dialog.sheet { border-radius: var(--ds-r-sheet) var(--ds-r-sheet) 0 0; padding-top: 10px; box-shadow: 0 -10px 40px rgba(14, 27, 51, 0.18); }
+dialog.sheet::before { content: ""; position: absolute; top: 8px; left: 50%; width: 38px; height: 5px; margin-left: -19px; border-radius: 3px; background: var(--ds-line-2); }
+dialog.sheet::backdrop { background: var(--ds-scrim); }
+.sheet-cab h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
+.sheet input[type=text], .sheet input[type=date], .sheet textarea { border: 1.5px solid transparent !important; background: var(--ds-surface-2) !important; border-radius: var(--ds-r-field) !important; }
+.sheet input:focus, .sheet textarea:focus { outline: none; border-color: var(--ds-tint) !important; box-shadow: 0 0 0 4px var(--ds-tint-soft); }
+.sheet textarea { font-family: var(--ds-font-mono); }
+.toast { border-radius: var(--ds-r-pill); background: rgba(14, 27, 51, 0.88); color: #fff; -webkit-backdrop-filter: var(--ds-glass-blur); backdrop-filter: var(--ds-glass-blur); }
+
+/*DS:LAYER:END*/
 </style>
 </head>
 <body>
 
 <div class="app">
   <header class="top">
-    <h1>Mis créditos</h1>
-    <button type="button" class="btn btn-quiet" id="btn-agregar" data-act="agregar">Agregar crédito</button>
+    <img class="mark app-icon" src="icons/apple-touch-icon.png" alt="">
+    <div class="top-t"><p class="eyebrow">Créditos de consumo</p><h1>Mis créditos</h1></div>
+    <button type="button" class="btn btn-quiet" id="btn-agregar" data-act="agregar" aria-label="Agregar crédito"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </header>
 
   <section class="resumen" aria-labelledby="res-label">
