@@ -140,7 +140,8 @@ body {
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.012em;
 }
-/* ── fin de los tokens comunes ── */
+/*DS:TOKENS:END*/
+/*DS:VARS:START*/
 
 :root {
   --bg: var(--ds-bg); --surface: var(--ds-surface); --inset: var(--ds-surface-2); --sunken: var(--ds-fill-2); --line: var(--ds-line-2);
@@ -159,7 +160,7 @@ body {
     --accent-ink: #0A1224;
 }
 
-/*DS:TOKENS:END*/
+/*DS:VARS:END*/
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -371,8 +372,8 @@ dialog.sheet[open]{animation:sube .24s cubic-bezier(.2,.8,.2,1)}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 
-/*DS:LAYER:START*/
-/* ── Domésticas · base común (v1) ── */
+/*DS:BASE:START*/
+/* ── Domésticas · elementos comunes (v1): fondo, tipografía, campos, icono de la app ── */
 html { background: var(--ds-bg); }
 body {
   font-family: var(--ds-font);
@@ -388,7 +389,8 @@ button, input, select, textarea { font-family: inherit; }
 input, select, textarea { accent-color: var(--ds-btn); caret-color: var(--ds-tint); }
 @keyframes ds-rise { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
 .mark.app-icon, img.app-icon { display: block; overflow: hidden; padding: 0; background: none; object-fit: cover; border-radius: 23%; box-shadow: 0 0 0 0.5px rgba(14, 27, 51, 0.08), 0 4px 12px rgba(41, 80, 244, 0.25); }
-/* ── fin de la base común ── */
+/*DS:BASE:END*/
+/*DS:APP:START*/
 
 /* Mis créditos */
 .app { gap: 22px; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
@@ -453,7 +455,7 @@ dialog.sheet::backdrop { background: var(--ds-scrim); }
 .sheet textarea { font-family: var(--ds-font-mono); }
 .toast { border-radius: var(--ds-r-pill); background: rgba(14, 27, 51, 0.88); color: #fff; -webkit-backdrop-filter: var(--ds-glass-blur); backdrop-filter: var(--ds-glass-blur); }
 
-/*DS:LAYER:END*/
+/*DS:APP:END*/
 </style>
 <style>/* Sin zoom con los dedos ni con doble toque: se usa como app instalada, no como página */ html { touch-action: pan-x pan-y; }</style>
 </head>
